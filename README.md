@@ -89,9 +89,34 @@ Binary formats (`.docx`, `.xlsx`, `.pptx`, `.pdf`) are matched **by filename** o
 
 ## Requirements
 
-- Python 3.9+
-- Optional: [ripgrep](https://github.com/BurntSushi/ripgrep) (`brew install ripgrep`) for fastest
-  search; without it, a pure-Python scanner is used automatically.
+- **Python 3.9+** — the only hard requirement.
+- **[ripgrep](https://github.com/BurntSushi/ripgrep) (strongly recommended)** — retrace uses it as
+  the search engine when present. It's dramatically faster on large corpora *and* more accurate
+  (the pure-Python fallback can under-match). Without it, retrace still works via a built-in
+  fallback scanner — you'll see `· python fallback` in the results header.
+
+  ```bash
+  # macOS
+  brew install ripgrep
+  # Debian/Ubuntu
+  sudo apt install ripgrep
+  # Fedora
+  sudo dnf install ripgrep
+  # Arch
+  sudo pacman -S ripgrep
+  # Windows
+  winget install BurntSushi.ripgrep.MSVC   # or: choco install ripgrep / scoop install ripgrep
+  # any platform with Rust
+  cargo install ripgrep
+  ```
+
+  After installing, restart retrace (`./start.sh restart`). retrace auto-detects `rg` on `PATH` —
+  no config needed.
+
+  > ripgrep is open source (MIT / Unlicense), by Andrew Gallant, and ships inside VS Code and many
+  > distros — a well-audited dependency. Homebrew and the release binaries are checksum-verified;
+  > use `brew install --build-from-source ripgrep` or `cargo install ripgrep` if you prefer to
+  > compile locally.
 
 ## How it works
 
