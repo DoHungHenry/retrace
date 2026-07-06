@@ -164,12 +164,19 @@ function renderResults(data, q, wholeWord) {
         <span class="mcount">${r.count} match${r.count === 1 ? "" : "es"}</span>
         <span class="src">${r.source}</span>
         ${kwChips}
+        ${r.provider === "files" ? `<button class="reveal" data-path="${esc(r.locator)}" title="Reveal in Finder / Explorer">Reveal ↗</button>` : ""}
       </div>
       ${snips}
     </div>`;
   }
   res.innerHTML = html;
   $$(".result", res).forEach((el) => el.onclick = () => openHit(JSON.parse(el.dataset.json)));
+  $$(".reveal", res).forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();                       // don't also open the preview
+    b.textContent = "Revealing…";
+    await api(`/api/reveal?path=${encodeURIComponent(b.dataset.path)}`);
+    b.textContent = "Reveal ↗";
+  });
 }
 
 // highlight every keyword (terms may be a string or array)

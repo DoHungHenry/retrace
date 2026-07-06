@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import sys
 import threading
 from pathlib import Path
 
@@ -88,3 +90,26 @@ def read_file(path: str, cap: int = 200_000) -> dict | None:
     except OSError:
         return None
     return {"path": str(rp), "text": data[:cap], "truncated": len(data) > cap}
+
+
+def reveal(path: str) -> dict:
+    """Reveal a file in the OS file manager (Finder/Explorer). Read-only, sandboxed to
+    configured sources. Uses subprocess arg-lists (no shell) so paths can't inject."""
+    try:
+        rp = Path(path).resolve()
+    except OSError:
+        return {"error": "bad path"}
+    if not any(_is_within(rp, Path(s["path"]).resolve()) for s in load_sources()):
+        return {"error": "not an allowed path"}
+    if not rp.exists():
+        return {"error": "not found"}
+    try:
+        if sys.platform == "darwin":
+            subprocess.run(["open", "-R", str(rp)], check=False)          # Finder, selects file
+        elif sys.platform.startswith("win"):
+            subprocess.run(["explorer", f"/select,{rp}"], check=False)    # Explorer, selects file
+        else:
+            subprocess.run(["xdg-open", str(rp.parent)], check=False)     # Linux: open folder
+        return {"ok": True}
+    except OSError as e:
+        return {"error": str(e)}
