@@ -16,7 +16,12 @@ function toggleSpace(path) {
   runSearch();
 }
 function syncRailHighlight() {
-  $$("#projects li, #sources li").forEach((x) => x.classList.toggle("on", state.selected.has(x.dataset.dir)));
+  $$("#projects li, #sources li").forEach((x) => {
+    const on = state.selected.has(x.dataset.dir);
+    x.classList.toggle("on", on);
+    const cb = x.querySelector(".spacebox");
+    if (cb) cb.checked = on;                    // checkbox mirrors selection state
+  });
 }
 
 // ---------- boot ----------
@@ -45,7 +50,7 @@ async function renderSources() {
     li.dataset.dir = s.path;
     li.dataset.path = s.path;
     li.innerHTML =
-      `<span class="nm"><span class="dot files"></span>${esc(s.label)}</span>` +
+      `<span class="nm"><input type="checkbox" class="spacebox" tabindex="-1"><span class="dot files"></span>${esc(s.label)}</span>` +
       `<span class="ct"><button class="rm" title="Remove">✕</button></span>`;
     li.querySelector(".nm").onclick = () => toggleSpace(s.path);
     li.querySelector(".rm").onclick = async (e) => {
@@ -81,7 +86,7 @@ function renderRail() {
     li.dataset.path = p.realPath;
     const dots = Object.keys(p.providers || {}).map((pr) => `<span class="dot ${pr}"></span>`).join("");
     li.innerHTML =
-      `<span class="nm">${dots}${esc(shortName(p.realPath))}</span>` +
+      `<span class="nm"><input type="checkbox" class="spacebox" tabindex="-1">${dots}${esc(shortName(p.realPath))}</span>` +
       `<span class="ct">${p.hasMemory ? '<span class="mem">◆</span> ' : ""}${p.sessionCount}</span>`;
     li.onclick = () => toggleSpace(p.realPath);
     ul.appendChild(li);

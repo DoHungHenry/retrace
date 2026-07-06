@@ -27,6 +27,7 @@ body {
 #projects li:hover { background: var(--panel2); color: var(--txt); }
 #projects li.on { background: #223049; color: #fff; }
 #projects li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.spacebox { pointer-events: none; margin: 0 7px 0 0; vertical-align: middle; accent-color: var(--accent, #6ea8fe); flex-shrink: 0; }
 #projects li .ct { font-size: 11px; opacity: .7; flex-shrink: 0; }
 #projects li .mem { color: var(--mem); flex-shrink: 0; }
 /* hover tooltip = full real path */
