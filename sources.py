@@ -93,14 +93,14 @@ def read_file(path: str, cap: int = 200_000) -> dict | None:
 
 
 def reveal(path: str) -> dict:
-    """Reveal a file in the OS file manager (Finder/Explorer). Read-only, sandboxed to
-    configured sources. Uses subprocess arg-lists (no shell) so paths can't inject."""
+    """Reveal a file in the OS file manager (Finder/Explorer). Read-only: just opens the
+    OS file manager at the file, never reads or serves content — so it's unrestricted and
+    can reveal any result (AI history .jsonl, memory .md, or a folder source). Uses
+    subprocess arg-lists (no shell) so paths can't inject."""
     try:
         rp = Path(path).resolve()
     except OSError:
         return {"error": "bad path"}
-    if not any(_is_within(rp, Path(s["path"]).resolve()) for s in load_sources()):
-        return {"error": "not an allowed path"}
     if not rp.exists():
         return {"error": "not found"}
     try:

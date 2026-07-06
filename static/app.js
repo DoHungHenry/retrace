@@ -164,7 +164,7 @@ function renderResults(data, q, wholeWord) {
         <span class="mcount">${r.count} match${r.count === 1 ? "" : "es"}</span>
         <span class="src">${r.source}</span>
         ${kwChips}
-        ${r.provider === "files" ? `<button class="reveal" data-path="${esc(r.locator)}" title="Reveal in Finder / Explorer">Reveal ↗</button>` : ""}
+        ${r.path ? `<button class="reveal" data-path="${esc(r.path)}" title="Reveal in Finder / Explorer">Reveal ↗</button>` : ""}
       </div>
       ${snips}
     </div>`;
