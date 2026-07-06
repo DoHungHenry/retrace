@@ -120,6 +120,9 @@ body {
 .selctl:hover { border-color: var(--accent, #6ea8fe); }
 .grouphdr { margin: 16px 0 6px; padding: 4px 2px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent, #6ea8fe); border-bottom: 1px solid var(--border, #2a2a30); position: sticky; top: 0; background: var(--bg, #141417); z-index: 1; }
 .grouphdr:first-of-type { margin-top: 4px; }
+.grouphdr { cursor: pointer; user-select: none; }
+.grouphdr .caret { display: inline-block; margin-right: 6px; transition: transform .1s; }
+.grouphdr.collapsed .caret { transform: rotate(-90deg); }
 
 /* ---- drawer ---- */
 #scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 40; }

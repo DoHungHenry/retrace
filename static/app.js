@@ -192,7 +192,7 @@ function renderResults(data, q, wholeWord) {
       if (gval !== lastGroup) {
         lastGroup = gval;
         const gtext = gb === "project" ? shortName(gval) : gval;
-        html += `<div class="grouphdr">${esc(gtext || "—")}</div>`;
+        html += `<div class="grouphdr" title="Click to collapse / expand"><span class="caret">▾</span>${esc(gtext || "—")}</div>`;
       }
     }
     const proj = esc(shortName(r.project));
@@ -216,6 +216,12 @@ function renderResults(data, q, wholeWord) {
   }
   res.innerHTML = html;
   $$(".pg", res).forEach((b) => b.onclick = () => { runSearch(+b.dataset.page); res.scrollTop = 0; });
+  $$(".grouphdr", res).forEach((h) => h.onclick = () => {   // toggle collapse of this group's rows
+    const collapsed = h.classList.toggle("collapsed");
+    for (let el = h.nextElementSibling; el && !el.classList.contains("grouphdr"); el = el.nextElementSibling) {
+      el.style.display = collapsed ? "none" : "";
+    }
+  });
   const clr = $(".clearspaces", res);
   if (clr) clr.onclick = () => { state.selected.clear(); syncRailHighlight(); runSearch(); };
   $$(".result", res).forEach((el) => el.onclick = () => openHit(JSON.parse(el.dataset.json)));
