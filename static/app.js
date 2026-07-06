@@ -12,8 +12,8 @@ const state = { projects: [], selected: new Set(), engine: "", page: 1 };
 function toggleSpace(path) {
   if (state.selected.has(path)) state.selected.delete(path);
   else state.selected.add(path);
-  syncRailHighlight();
-  runSearch();
+  syncRailHighlight();      // instant visual feedback
+  scheduleSearch();         // debounced: pick several spaces → one search
 }
 function syncRailHighlight() {
   $$("#projects li, #sources li").forEach((x) => {
@@ -99,12 +99,17 @@ function shortName(path) {
 }
 
 // ---------- search ----------
+// Debounced trigger: coalesce rapid incremental changes (typing, ticking several
+// space checkboxes, toggling chips) into ONE search instead of firing per event.
+let _searchTimer;
+function scheduleSearch(delay = 400) {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => runSearch(), delay);
+}
 function bindSearch() {
-  let t;
-  const go = () => { clearTimeout(t); t = setTimeout(() => runSearch(), 400); };
-  $("#q").addEventListener("input", go);
-  $("#since").addEventListener("change", () => runSearch());
-  $("#until").addEventListener("change", () => runSearch());
+  $("#q").addEventListener("input", () => scheduleSearch());
+  $("#since").addEventListener("change", () => scheduleSearch());
+  $("#until").addEventListener("change", () => scheduleSearch());
   document.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); $("#q").select(); }
     if (e.key === "Escape") closeDrawer();
@@ -113,14 +118,14 @@ function bindSearch() {
 function bindChips() {
   // generic on/off chips (source, role, whole-word)
   $$(".chip").filter((c) => c.id !== "matchmode").forEach((c) =>
-    c.addEventListener("click", () => { c.classList.toggle("on"); runSearch(); }));
+    c.addEventListener("click", () => { c.classList.toggle("on"); scheduleSearch(); }));
   // AND/OR is a two-state toggle, not on/off
   const mm = $("#matchmode");
   mm.addEventListener("click", () => {
     const or = mm.dataset.mode === "or";
     mm.dataset.mode = or ? "and" : "or";
     mm.textContent = or ? "All words" : "Any word";
-    runSearch();
+    scheduleSearch();
   });
 }
 function chipVals(group) {
