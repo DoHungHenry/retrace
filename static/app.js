@@ -5,7 +5,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-const state = { projects: [], activeProject: null, engine: "" };
+const state = { projects: [], activeProject: null, engine: "", page: 1 };
 
 // ---------- boot ----------
 init();
@@ -91,10 +91,10 @@ function shortName(path) {
 // ---------- search ----------
 function bindSearch() {
   let t;
-  const go = () => { clearTimeout(t); t = setTimeout(runSearch, 180); };
+  const go = () => { clearTimeout(t); t = setTimeout(() => runSearch(), 180); };
   $("#q").addEventListener("input", go);
-  $("#since").addEventListener("change", runSearch);
-  $("#until").addEventListener("change", runSearch);
+  $("#since").addEventListener("change", () => runSearch());
+  $("#until").addEventListener("change", () => runSearch());
   document.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); $("#q").select(); }
     if (e.key === "Escape") closeDrawer();
@@ -117,13 +117,16 @@ function chipVals(group) {
   return $$(`.chipset[data-group="${group}"] .chip.on`).map((c) => c.dataset.val);
 }
 
-async function runSearch() {
+async function runSearch(page = 1) {
   const q = $("#q").value.trim();
   const res = $("#results");
   if (!q) { res.innerHTML = `<div class="empty">Type to search across every session and memory file.</div>`; return; }
+  state.page = page;
 
   const params = new URLSearchParams();
   params.set("q", q);
+  params.set("page", page);
+  params.set("per", "50");
   if (state.activeProject) params.set("project", state.activeProject);
   const prov = chipVals("provider"); if (prov.length) params.set("provider", prov.join(","));
   const src = chipVals("source"); if (src.length) params.set("source", src.join(","));
@@ -149,8 +152,16 @@ function renderResults(data, q, wholeWord) {
   if (!items.length) { res.innerHTML = `<div class="empty">No matches for “${esc(q)}”.</div>`; return; }
   const noun = data.mode === "or" ? "any" : "all";
   const total = data.total != null ? data.total : items.length;
-  const shown = data.truncated ? ` (showing ${items.length})` : "";
-  let html = `<div class="count">${total} file${total === 1 ? "" : "s"}${shown} · ${esc(kws.join(" " + noun + " "))}${data.engine === "python" ? " · python fallback" : ""}</div>`;
+  const page = data.page || 1, pages = data.pages || 1;
+  const label = `${total} file${total === 1 ? "" : "s"} · ${esc(kws.join(" " + noun + " "))}${data.engine === "python" ? " · python fallback" : ""}`;
+  const pager = pages > 1
+    ? `<span class="pager">
+         <button class="pg" data-page="${page - 1}" ${page <= 1 ? "disabled" : ""}>← Prev</button>
+         <span class="pgnum">${page} / ${pages}</span>
+         <button class="pg" data-page="${page + 1}" ${page >= pages ? "disabled" : ""}>Next →</button>
+       </span>`
+    : "";
+  let html = `<div class="count"><span>${label}</span>${pager}</div>`;
   for (const r of items) {
     const proj = esc(shortName(r.project));
     const when = r.ts ? new Date(r.ts).toLocaleString() : "";
@@ -172,6 +183,7 @@ function renderResults(data, q, wholeWord) {
     </div>`;
   }
   res.innerHTML = html;
+  $$(".pg", res).forEach((b) => b.onclick = () => { runSearch(+b.dataset.page); res.scrollTop = 0; });
   $$(".result", res).forEach((el) => el.onclick = () => openHit(JSON.parse(el.dataset.json)));
   $$(".reveal", res).forEach((b) => b.onclick = async (e) => {
     e.stopPropagation();                       // don't also open the preview

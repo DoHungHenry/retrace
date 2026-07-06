@@ -51,13 +51,13 @@ def search(query: str, projects: list[str], sources: list[str],
            roles: list[str], since: str, until: str,
            whole_word: bool = True, match_mode: str = "and",
            min_matches: int = 1, providers: list[str] | None = None,
-           limit: int = 150) -> dict:
+           page: int = 1, per_page: int = 50) -> dict:
     """Search selected providers, group hits by file, combine keywords by AND/OR."""
     query = (query or "").strip()
     keywords = query.split()
     if not keywords:
-        return {"results": [], "engine": _engine(), "truncated": False,
-                "total": 0, "returned": 0}
+        return {"results": [], "engine": _engine(), "total": 0, "returned": 0,
+                "page": 1, "per_page": max(1, per_page), "pages": 0}
 
     prov_sel = [p for p in (providers or ALL_PROVIDERS) if p in ALL_PROVIDERS] or ALL_PROVIDERS
     want_history = not sources or "history" in sources
@@ -134,13 +134,17 @@ def search(query: str, projects: list[str], sources: list[str],
         })
 
     out.sort(key=lambda r: (r["count"], r["ts"] or ""), reverse=True)
-    total = len(out)                       # files matched (before the display cap)
-    truncated = total > limit
-    out = out[:limit]
+    total = len(out)                       # files matched (before paging)
+    per_page = max(1, per_page)
+    pages = (total + per_page - 1) // per_page
+    page = min(max(1, page), max(1, pages))
+    start = (page - 1) * per_page
+    out = out[start:start + per_page]      # this page's window
     for r in out:
         r["title"] = _title_of(r)
-    return {"results": out, "engine": _engine(), "truncated": truncated,
+    return {"results": out, "engine": _engine(),
             "total": total, "returned": len(out),
+            "page": page, "per_page": per_page, "pages": pages,
             "keywords": keywords, "mode": match_mode}
 
 

@@ -73,6 +73,8 @@ class Handler(BaseHTTPRequestHandler):
                     match_mode=(_one(q, "mode") or "and").lower(),
                     min_matches=max(1, int(_one(q, "min") or 1)),
                     providers=_multi(q, "provider"),
+                    page=max(1, int(_one(q, "page") or 1)),
+                    per_page=max(1, min(200, int(_one(q, "per") or 50))),
                 ))
             else:
                 self._err(404, "not found")
