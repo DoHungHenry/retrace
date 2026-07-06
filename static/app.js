@@ -148,7 +148,9 @@ function renderResults(data, q, wholeWord) {
   const kws = data.keywords || [q];
   if (!items.length) { res.innerHTML = `<div class="empty">No matches for “${esc(q)}”.</div>`; return; }
   const noun = data.mode === "or" ? "any" : "all";
-  let html = `<div class="count">${items.length}${data.truncated ? "+" : ""} sessions · ${esc(kws.join(" " + noun + " "))}${data.engine === "python" ? " · python fallback" : ""}</div>`;
+  const total = data.total != null ? data.total : items.length;
+  const shown = data.truncated ? ` (showing ${items.length})` : "";
+  let html = `<div class="count">${total} file${total === 1 ? "" : "s"}${shown} · ${esc(kws.join(" " + noun + " "))}${data.engine === "python" ? " · python fallback" : ""}</div>`;
   for (const r of items) {
     const proj = esc(shortName(r.project));
     const when = r.ts ? new Date(r.ts).toLocaleString() : "";

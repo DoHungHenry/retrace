@@ -56,7 +56,8 @@ def search(query: str, projects: list[str], sources: list[str],
     query = (query or "").strip()
     keywords = query.split()
     if not keywords:
-        return {"results": [], "engine": _engine(), "truncated": False}
+        return {"results": [], "engine": _engine(), "truncated": False,
+                "total": 0, "returned": 0}
 
     prov_sel = [p for p in (providers or ALL_PROVIDERS) if p in ALL_PROVIDERS] or ALL_PROVIDERS
     want_history = not sources or "history" in sources
@@ -133,11 +134,13 @@ def search(query: str, projects: list[str], sources: list[str],
         })
 
     out.sort(key=lambda r: (r["count"], r["ts"] or ""), reverse=True)
-    truncated = len(out) > limit
+    total = len(out)                       # files matched (before the display cap)
+    truncated = total > limit
     out = out[:limit]
     for r in out:
         r["title"] = _title_of(r)
     return {"results": out, "engine": _engine(), "truncated": truncated,
+            "total": total, "returned": len(out),
             "keywords": keywords, "mode": match_mode}
 
 
