@@ -91,7 +91,7 @@ function shortName(path) {
 // ---------- search ----------
 function bindSearch() {
   let t;
-  const go = () => { clearTimeout(t); t = setTimeout(() => runSearch(), 180); };
+  const go = () => { clearTimeout(t); t = setTimeout(() => runSearch(), 400); };
   $("#q").addEventListener("input", go);
   $("#since").addEventListener("change", () => runSearch());
   $("#until").addEventListener("change", () => runSearch());
