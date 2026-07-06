@@ -113,6 +113,8 @@ body {
 .pager .pg:hover:not(:disabled) { border-color: var(--accent, #6ea8fe); }
 .pager .pg:disabled { opacity: .4; cursor: default; }
 .pager .pgnum { color: var(--dim); font-variant-numeric: tabular-nums; }
+.clearspaces { background: none; border: none; color: var(--accent, #6ea8fe); font-size: 12px; cursor: pointer; padding: 0; }
+.clearspaces:hover { text-decoration: underline; }
 
 /* ---- drawer ---- */
 #scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 40; }

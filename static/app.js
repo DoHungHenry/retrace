@@ -3,9 +3,21 @@
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const esc = (s) => (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-const state = { projects: [], activeProject: null, engine: "", page: 1 };
+const state = { projects: [], selected: new Set(), engine: "", page: 1 };
+
+// Toggle a "space" (project or custom source) in/out of the multi-select filter.
+// Empty selection = search all spaces. Shared by the project rail and the sources list.
+function toggleSpace(path) {
+  if (state.selected.has(path)) state.selected.delete(path);
+  else state.selected.add(path);
+  syncRailHighlight();
+  runSearch();
+}
+function syncRailHighlight() {
+  $$("#projects li, #sources li").forEach((x) => x.classList.toggle("on", state.selected.has(x.dataset.dir)));
+}
 
 // ---------- boot ----------
 init();
@@ -35,20 +47,17 @@ async function renderSources() {
     li.innerHTML =
       `<span class="nm"><span class="dot files"></span>${esc(s.label)}</span>` +
       `<span class="ct"><button class="rm" title="Remove">✕</button></span>`;
-    li.querySelector(".nm").onclick = () => {
-      const same = state.activeProject === s.path;
-      state.activeProject = same ? null : s.path;
-      $$("#projects li, #sources li").forEach((x) => x.classList.toggle("on", x.dataset.dir === state.activeProject));
-      runSearch();
-    };
+    li.querySelector(".nm").onclick = () => toggleSpace(s.path);
     li.querySelector(".rm").onclick = async (e) => {
       e.stopPropagation();
+      state.selected.delete(s.path);           // drop from filter if it was selected
       await api(`/api/sources/remove?id=${encodeURIComponent(s.id)}`);
       await renderSources();
       runSearch();
     };
     ul.appendChild(li);
   }
+  syncRailHighlight();                          // keep selection visible after re-render
 }
 
 function bindSources() {
@@ -74,14 +83,10 @@ function renderRail() {
     li.innerHTML =
       `<span class="nm">${dots}${esc(shortName(p.realPath))}</span>` +
       `<span class="ct">${p.hasMemory ? '<span class="mem">◆</span> ' : ""}${p.sessionCount}</span>`;
-    li.onclick = () => {
-      const same = state.activeProject === p.realPath;
-      state.activeProject = same ? null : p.realPath;
-      $$("#projects li").forEach((x) => x.classList.toggle("on", x.dataset.dir === state.activeProject));
-      runSearch();
-    };
+    li.onclick = () => toggleSpace(p.realPath);
     ul.appendChild(li);
   }
+  syncRailHighlight();                          // keep selection visible after re-render
 }
 function shortName(path) {
   const parts = (path || "").split("/").filter(Boolean);
@@ -127,7 +132,7 @@ async function runSearch(page = 1) {
   params.set("q", q);
   params.set("page", page);
   params.set("per", "50");
-  if (state.activeProject) params.set("project", state.activeProject);
+  if (state.selected.size) params.set("project", [...state.selected].join(","));
   const prov = chipVals("provider"); if (prov.length) params.set("provider", prov.join(","));
   const src = chipVals("source"); if (src.length) params.set("source", src.join(","));
   const role = chipVals("role"); if (role.length) params.set("role", role.join(","));
@@ -153,7 +158,9 @@ function renderResults(data, q, wholeWord) {
   const noun = data.mode === "or" ? "any" : "all";
   const total = data.total != null ? data.total : items.length;
   const page = data.page || 1, pages = data.pages || 1;
-  const label = `${total} file${total === 1 ? "" : "s"} · ${esc(kws.join(" " + noun + " "))}${data.engine === "python" ? " · python fallback" : ""}`;
+  const nSel = state.selected.size;
+  const scope = nSel ? ` · <button class="clearspaces" title="Clear space filter">${nSel} space${nSel === 1 ? "" : "s"} ✕</button>` : "";
+  const label = `${total} file${total === 1 ? "" : "s"} · ${esc(kws.join(" " + noun + " "))}${data.engine === "python" ? " · python fallback" : ""}${scope}`;
   const pager = pages > 1
     ? `<span class="pager">
          <button class="pg" data-page="${page - 1}" ${page <= 1 ? "disabled" : ""}>← Prev</button>
@@ -184,6 +191,8 @@ function renderResults(data, q, wholeWord) {
   }
   res.innerHTML = html;
   $$(".pg", res).forEach((b) => b.onclick = () => { runSearch(+b.dataset.page); res.scrollTop = 0; });
+  const clr = $(".clearspaces", res);
+  if (clr) clr.onclick = () => { state.selected.clear(); syncRailHighlight(); runSearch(); };
   $$(".result", res).forEach((el) => el.onclick = () => openHit(JSON.parse(el.dataset.json)));
   $$(".reveal", res).forEach((b) => b.onclick = async (e) => {
     e.stopPropagation();                       // don't also open the preview
