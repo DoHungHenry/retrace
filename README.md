@@ -16,6 +16,10 @@ search-first interface, grouped by the real project you were working in.
 - 📁 **Beyond AI history** — add any local folder as a source and full-text search it too.
 - 🪶 **Zero dependencies** — Python 3 standard library only. One command to run.
 
+> **Not comfortable with the terminal?** See the plain-English
+> [Getting Started guide](docs/GETTING-STARTED.md) — download the ZIP and double-click
+> `start-retrace.command` (Mac) or `start-retrace.bat` (Windows).
+
 ## Quickstart
 
 ```bash
