@@ -75,6 +75,8 @@ class Handler(BaseHTTPRequestHandler):
                     providers=_multi(q, "provider"),
                     page=max(1, int(_one(q, "page") or 1)),
                     per_page=max(1, min(200, int(_one(q, "per") or 50))),
+                    sort=(_one(q, "sort") or "relevance"),
+                    group_by=(_one(q, "group") or ""),
                 ))
             else:
                 self._err(404, "not found")

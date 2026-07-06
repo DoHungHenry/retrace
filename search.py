@@ -51,13 +51,15 @@ def search(query: str, projects: list[str], sources: list[str],
            roles: list[str], since: str, until: str,
            whole_word: bool = True, match_mode: str = "and",
            min_matches: int = 1, providers: list[str] | None = None,
-           page: int = 1, per_page: int = 50) -> dict:
+           page: int = 1, per_page: int = 50,
+           sort: str = "relevance", group_by: str = "") -> dict:
     """Search selected providers, group hits by file, combine keywords by AND/OR."""
     query = (query or "").strip()
     keywords = query.split()
     if not keywords:
         return {"results": [], "engine": _engine(), "total": 0, "returned": 0,
-                "page": 1, "per_page": max(1, per_page), "pages": 0}
+                "page": 1, "per_page": max(1, per_page), "pages": 0,
+                "sort": sort, "group_by": group_by}
 
     prov_sel = [p for p in (providers or ALL_PROVIDERS) if p in ALL_PROVIDERS] or ALL_PROVIDERS
     want_history = not sources or "history" in sources
@@ -133,7 +135,23 @@ def search(query: str, projects: list[str], sources: list[str],
             "title": "", "path": g["path"],
         })
 
-    out.sort(key=lambda r: (r["count"], r["ts"] or ""), reverse=True)
+    # Sort the full result set (determines paging order), then optionally cluster
+    # into groups. Two stable passes: inner sort first, then group — so items keep
+    # their sort order within each group. All keys use fields present pre-title
+    # (title is resolved only for the returned page, so it can't be a sort key).
+    if sort == "newest":
+        out.sort(key=lambda r: r["ts"] or "", reverse=True)
+    elif sort == "oldest":
+        out.sort(key=lambda r: r["ts"] or "")
+    elif sort == "project":
+        out.sort(key=lambda r: (r["project"] or "").lower())
+    elif sort == "provider":
+        out.sort(key=lambda r: r["provider"])
+    else:                                  # relevance (default): match count, then recency
+        out.sort(key=lambda r: (r["count"], r["ts"] or ""), reverse=True)
+    if group_by in ("provider", "project", "source"):
+        out.sort(key=lambda r: (r.get(group_by) or "").lower())   # stable → keeps inner order
+
     total = len(out)                       # files matched (before paging)
     per_page = max(1, per_page)
     pages = (total + per_page - 1) // per_page
@@ -145,6 +163,7 @@ def search(query: str, projects: list[str], sources: list[str],
     return {"results": out, "engine": _engine(),
             "total": total, "returned": len(out),
             "page": page, "per_page": per_page, "pages": pages,
+            "sort": sort, "group_by": group_by,
             "keywords": keywords, "mode": match_mode}
 
 

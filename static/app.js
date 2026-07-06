@@ -110,6 +110,8 @@ function bindSearch() {
   $("#q").addEventListener("input", () => scheduleSearch());
   $("#since").addEventListener("change", () => scheduleSearch());
   $("#until").addEventListener("change", () => scheduleSearch());
+  $("#sortby").addEventListener("change", () => scheduleSearch());
+  $("#groupby").addEventListener("change", () => scheduleSearch());
   document.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); $("#q").select(); }
     if (e.key === "Escape") closeDrawer();
@@ -153,6 +155,9 @@ async function runSearch(page = 1) {
   if ($("#hidesingle").classList.contains("on")) params.set("min", "2");
   if ($("#since").value) params.set("since", $("#since").value);
   if ($("#until").value) params.set("until", $("#until").value);
+  params.set("sort", $("#sortby").value);
+  const groupBy = $("#groupby").value;
+  if (groupBy) params.set("group", groupBy);
 
   res.innerHTML = `<div class="empty">Searching…</div>`;
   const data = await api("/api/search?" + params.toString());
@@ -179,7 +184,17 @@ function renderResults(data, q, wholeWord) {
        </span>`
     : "";
   let html = `<div class="count"><span>${label}</span>${pager}</div>`;
+  const gb = data.group_by || "";                // "provider" | "project" | "source" | ""
+  let lastGroup = null;
   for (const r of items) {
+    if (gb) {                                    // header row when the group value changes
+      const gval = r[gb] || "";
+      if (gval !== lastGroup) {
+        lastGroup = gval;
+        const gtext = gb === "project" ? shortName(gval) : gval;
+        html += `<div class="grouphdr">${esc(gtext || "—")}</div>`;
+      }
+    }
     const proj = esc(shortName(r.project));
     const when = r.ts ? new Date(r.ts).toLocaleString() : "";
     const title = esc(r.title || r.file || (r.sessionId || "").slice(0, 8));

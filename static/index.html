@@ -41,6 +41,19 @@
         <button id="hidesingle" class="chip" title="Hide sessions that mention the term only once (incidental)">Hide 1-hit</button>
         <input id="since" type="date" title="from date" />
         <input id="until" type="date" title="to date" />
+        <select id="sortby" class="selctl" title="Sort results by">
+          <option value="relevance">Sort: Relevance</option>
+          <option value="newest">Sort: Newest</option>
+          <option value="oldest">Sort: Oldest</option>
+          <option value="project">Sort: Space</option>
+          <option value="provider">Sort: Provider</option>
+        </select>
+        <select id="groupby" class="selctl" title="Group results by">
+          <option value="">Group: None</option>
+          <option value="provider">Group: Provider</option>
+          <option value="project">Group: Space</option>
+          <option value="source">Group: Source</option>
+        </select>
       </div>
     </header>
 
