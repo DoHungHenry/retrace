@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>retrace — local AI history &amp; file search</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <aside id="rail">
+    <div class="rail-head">
+      <span class="logo">◍ retrace</span>
+      <span id="engine" class="engine" title="search engine"></span>
+    </div>
+    <div class="rail-sub">Projects</div>
+    <ul id="projects"></ul>
+    <div class="rail-sub sources-head">Sources <button id="add-source" title="Add a folder to search">+</button></div>
+    <ul id="sources"></ul>
+  </aside>
+
+  <main id="main">
+    <header id="searchbar">
+      <input id="q" type="search" placeholder="Search history &amp; memory…  (⌘K)" autocomplete="off" />
+      <div id="filters">
+        <div class="chipset" data-group="provider">
+          <button class="chip on" data-val="claude">Claude</button>
+          <button class="chip on" data-val="codex">Codex</button>
+          <button class="chip on" data-val="cline">Cline</button>
+          <button class="chip on" data-val="files">Files</button>
+        </div>
+        <div class="chipset" data-group="source">
+          <button class="chip on" data-val="history">History</button>
+          <button class="chip on" data-val="memory">Memory</button>
+        </div>
+        <div class="chipset" data-group="role">
+          <button class="chip" data-val="user">User</button>
+          <button class="chip" data-val="assistant">Assistant</button>
+        </div>
+        <button id="wholeword" class="chip on" title="Match whole words only (con ≠ const)">Whole word</button>
+        <button id="matchmode" class="chip on" data-mode="and" title="Multi-word: all keywords (AND) vs any keyword (OR)">All words</button>
+        <button id="hidesingle" class="chip" title="Hide sessions that mention the term only once (incidental)">Hide 1-hit</button>
+        <input id="since" type="date" title="from date" />
+        <input id="until" type="date" title="to date" />
+      </div>
+    </header>
+
+    <section id="results">
+      <div class="empty" id="hint">Type to search across every session and memory file.</div>
+    </section>
+  </main>
+
+  <div id="drawer" class="hidden">
+    <div class="drawer-head">
+      <span id="drawer-title"></span>
+      <button id="drawer-close" aria-label="close">✕</button>
+    </div>
+    <div id="drawer-body"></div>
+  </div>
+  <div id="scrim" class="hidden"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

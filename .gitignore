@@ -1,0 +1,13 @@
+# user data — never commit
+sources.json
+
+# generated demo dataset
+demo/data/
+
+# python
+__pycache__/
+*.py[cod]
+
+# os / editor
+.DS_Store
+*.log
