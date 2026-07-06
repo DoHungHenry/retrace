@@ -108,8 +108,6 @@ function scheduleSearch(delay = 400) {
 }
 function bindSearch() {
   $("#q").addEventListener("input", () => scheduleSearch());
-  $("#since").addEventListener("change", () => scheduleSearch());
-  $("#until").addEventListener("change", () => scheduleSearch());
   $("#sortby").addEventListener("change", () => scheduleSearch());
   $("#groupby").addEventListener("change", () => scheduleSearch());
   document.addEventListener("keydown", (e) => {
@@ -118,17 +116,9 @@ function bindSearch() {
   });
 }
 function bindChips() {
-  // generic on/off chips (source, role, whole-word)
-  $$(".chip").filter((c) => c.id !== "matchmode").forEach((c) =>
+  // on/off chips: provider, source, whole-word
+  $$(".chip").forEach((c) =>
     c.addEventListener("click", () => { c.classList.toggle("on"); scheduleSearch(); }));
-  // AND/OR is a two-state toggle, not on/off
-  const mm = $("#matchmode");
-  mm.addEventListener("click", () => {
-    const or = mm.dataset.mode === "or";
-    mm.dataset.mode = or ? "and" : "or";
-    mm.textContent = or ? "All words" : "Any word";
-    scheduleSearch();
-  });
 }
 function chipVals(group) {
   return $$(`.chipset[data-group="${group}"] .chip.on`).map((c) => c.dataset.val);
@@ -147,14 +137,8 @@ async function runSearch(page = 1) {
   if (state.selected.size) params.set("project", [...state.selected].join(","));
   const prov = chipVals("provider"); if (prov.length) params.set("provider", prov.join(","));
   const src = chipVals("source"); if (src.length) params.set("source", src.join(","));
-  const role = chipVals("role"); if (role.length) params.set("role", role.join(","));
   const wholeWord = $("#wholeword").classList.contains("on");
   if (!wholeWord) params.set("word", "0");
-  const mode = $("#matchmode").dataset.mode;      // "and" | "or"
-  params.set("mode", mode);
-  if ($("#hidesingle").classList.contains("on")) params.set("min", "2");
-  if ($("#since").value) params.set("since", $("#since").value);
-  if ($("#until").value) params.set("until", $("#until").value);
   params.set("sort", $("#sortby").value);
   const groupBy = $("#groupby").value;
   if (groupBy) params.set("group", groupBy);

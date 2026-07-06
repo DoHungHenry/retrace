@@ -66,9 +66,9 @@ Missing tools are simply skipped — run it with whatever you have installed.
 
 ## Features
 
-- **Search-first UI** — one box + filter chips: provider, source (history/memory), role, date.
-- **Whole-word** matching (toggle off for substring) and **multi-keyword AND/OR**.
-- **Grouped by session/file**, ranked by relevance; **Hide 1-hit** to drop incidental mentions.
+- **Search-first UI** — one box + filter chips: provider, source (history/memory), whole-word.
+- **Whole-word** matching (toggle off for substring); multiple keywords are AND-matched.
+- **Grouped by session/file**, ranked by relevance.
 - Click a result → full **transcript** (AI) or **file preview** (folders), with matches highlighted.
 - **Reveal ↗** button on every result — opens Finder / Explorer at the underlying file (AI transcript `.jsonl`, memory `.md`, or a folder-source file) so you can open it in any app you like (retrace never opens or edits it).
 - **Add/remove folder sources** from the UI. Content is searched for text files; **all files are findable by name** (so `.docx`/`.xlsx`/`.pdf` show up by filename).
