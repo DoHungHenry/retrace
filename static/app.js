@@ -218,36 +218,47 @@ function renderResults(data, q, wholeWord) {
   $$(".result", res).forEach((el) => el.onclick = () => openHit(JSON.parse(el.dataset.json)));
   $$(".rowbtn.reveal", res).forEach((b) => b.onclick = async (e) => {
     e.stopPropagation();                       // don't also open the preview
-    b.textContent = "Revealing…";
-    await api(`/api/reveal?path=${encodeURIComponent(b.dataset.path)}`);
-    b.textContent = "Reveal ↗";
+    const r = await api(`/api/reveal?path=${encodeURIComponent(b.dataset.path)}`);
+    toast(r && r.ok ? "Revealed in Finder / Explorer" : `Reveal failed: ${(r && r.error) || "error"}`, !!(r && r.ok));
   });
   $$(".rowbtn.open", res).forEach((b) => b.onclick = async (e) => {
     e.stopPropagation();
-    b.textContent = "Opening…";
-    await api(`/api/open?path=${encodeURIComponent(b.dataset.path)}`);
-    b.textContent = "Open";
+    const r = await api(`/api/open?path=${encodeURIComponent(b.dataset.path)}`);
+    toast(r && r.ok ? "Opening in default app…" : `Open failed: ${(r && r.error) || "error"}`, !!(r && r.ok));
   });
   $$(".rowbtn.copy", res).forEach((b) => b.onclick = async (e) => {
     e.stopPropagation();
-    await copyText(b.dataset.path);            // clipboard API + fallback for embedded webviews
-    const prev = b.textContent;
-    b.textContent = "Copied ✓";
-    setTimeout(() => { b.textContent = prev; }, 1200);
+    const ok = await copyText(b.dataset.path); // clipboard API + fallback for embedded webviews
+    toast(ok ? "File path copied to clipboard" : "Copy failed", ok);
   });
 }
 
 // Copy to clipboard; falls back to a hidden textarea when the async Clipboard API
-// is blocked (e.g. some embedded webviews / non-secure contexts).
+// is blocked (e.g. some embedded webviews / non-secure contexts). Returns success.
 async function copyText(text) {
   try {
-    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return; }
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
   } catch (_) { /* fall through */ }
   const ta = document.createElement("textarea");
   ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
   document.body.appendChild(ta); ta.select();
-  try { document.execCommand("copy"); } catch (_) { /* best effort */ }
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch (_) { ok = false; }
   document.body.removeChild(ta);
+  return ok;
+}
+
+// Transient top-right notification so actions with off-screen effects (copy,
+// open, reveal) give clear success/failure feedback.
+function toast(msg, ok = true) {
+  let box = document.getElementById("toasts");
+  if (!box) { box = document.createElement("div"); box.id = "toasts"; document.body.appendChild(box); }
+  const t = document.createElement("div");
+  t.className = "toast" + (ok ? "" : " err");
+  t.textContent = msg;
+  box.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("show"));
+  setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 250); }, 2400);
 }
 
 // highlight every keyword (terms may be a string or array)
