@@ -105,8 +105,9 @@ body {
 .filebody { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow-x: auto; }
 .filebody mark { background: var(--mark); color: #000; }
 .result .kw { background: #2a2f38; color: var(--mark); border-radius: 20px; padding: 0 7px; font-size: 10px; }
-.result .reveal { margin-left: auto; background: transparent; border: 1px solid var(--line); color: var(--dim); border-radius: 6px; padding: 1px 8px; font-size: 11px; cursor: pointer; }
-.result .reveal:hover { color: #fff; border-color: var(--accent); }
+.result .rowbtns { margin-left: auto; display: inline-flex; gap: 6px; flex-shrink: 0; }
+.result .rowbtn { background: transparent; border: 1px solid var(--line); color: var(--dim); border-radius: 6px; padding: 1px 8px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.result .rowbtn:hover { color: #fff; border-color: var(--accent); }
 .result .snip { font-size: 13px; line-height: 1.5; color: var(--txt); word-break: break-word; margin-top: 4px; }
 .result .snip + .snip { padding-top: 4px; border-top: 1px dashed var(--line); }
 .result .snip mark { background: var(--mark); color: #000; border-radius: 2px; padding: 0 1px; }

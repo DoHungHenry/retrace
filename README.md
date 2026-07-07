@@ -70,7 +70,7 @@ Missing tools are simply skipped — run it with whatever you have installed.
 - **Whole-word** matching (toggle off for substring); multiple keywords are AND-matched.
 - **Grouped by session/file**, ranked by relevance.
 - Click a result → full **transcript** (AI) or **file preview** (folders), with matches highlighted.
-- **Reveal ↗** button on every result — opens Finder / Explorer at the underlying file (AI transcript `.jsonl`, memory `.md`, or a folder-source file) so you can open it in any app you like (retrace never opens or edits it).
+- **Per-result actions** on every hit — **Open** (default app), **Copy path** (grab the absolute path to paste elsewhere / hand to another agent), and **Reveal ↗** (Finder / Explorer). Works for AI transcripts (`.jsonl`), memory (`.md`), and folder-source files; retrace never edits them.
 - **Add/remove folder sources** from the UI. Content is searched for text files; **all files are findable by name** (so `.docx`/`.xlsx`/`.pdf` show up by filename).
 - **Sort & group** results (by relevance/date/space/provider; group headers collapse).
 

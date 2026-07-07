@@ -196,7 +196,11 @@ function renderResults(data, q, wholeWord) {
         <span class="mcount">${r.count} match${r.count === 1 ? "" : "es"}</span>
         <span class="src">${r.source}</span>
         ${kwChips}
-        ${r.path ? `<button class="reveal" data-path="${esc(r.path)}" title="Reveal in Finder / Explorer">Reveal ↗</button>` : ""}
+        ${r.path ? `<span class="rowbtns">
+          <button class="rowbtn open" data-path="${esc(r.path)}" title="Open with default app">Open</button>
+          <button class="rowbtn copy" data-path="${esc(r.path)}" title="Copy file path">Copy path</button>
+          <button class="rowbtn reveal" data-path="${esc(r.path)}" title="Reveal in Finder / Explorer">Reveal ↗</button>
+        </span>` : ""}
       </div>
       ${snips}
     </div>`;
@@ -212,12 +216,38 @@ function renderResults(data, q, wholeWord) {
   const clr = $(".clearspaces", res);
   if (clr) clr.onclick = () => { state.selected.clear(); syncRailHighlight(); runSearch(); };
   $$(".result", res).forEach((el) => el.onclick = () => openHit(JSON.parse(el.dataset.json)));
-  $$(".reveal", res).forEach((b) => b.onclick = async (e) => {
+  $$(".rowbtn.reveal", res).forEach((b) => b.onclick = async (e) => {
     e.stopPropagation();                       // don't also open the preview
     b.textContent = "Revealing…";
     await api(`/api/reveal?path=${encodeURIComponent(b.dataset.path)}`);
     b.textContent = "Reveal ↗";
   });
+  $$(".rowbtn.open", res).forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    b.textContent = "Opening…";
+    await api(`/api/open?path=${encodeURIComponent(b.dataset.path)}`);
+    b.textContent = "Open";
+  });
+  $$(".rowbtn.copy", res).forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    await copyText(b.dataset.path);            // clipboard API + fallback for embedded webviews
+    const prev = b.textContent;
+    b.textContent = "Copied ✓";
+    setTimeout(() => { b.textContent = prev; }, 1200);
+  });
+}
+
+// Copy to clipboard; falls back to a hidden textarea when the async Clipboard API
+// is blocked (e.g. some embedded webviews / non-secure contexts).
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return; }
+  } catch (_) { /* fall through */ }
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); } catch (_) { /* best effort */ }
+  document.body.removeChild(ta);
 }
 
 // highlight every keyword (terms may be a string or array)

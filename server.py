@@ -61,6 +61,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(data) if data else self._err(403, "not an allowed file")
             elif route == "/api/reveal":
                 self._json(filesrc.reveal(_one(q, "path")))
+            elif route == "/api/open":
+                self._json(filesrc.open_path(_one(q, "path")))
             elif route == "/api/search":
                 self._json(search.search(
                     query=_one(q, "q"),

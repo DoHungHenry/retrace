@@ -113,3 +113,24 @@ def reveal(path: str) -> dict:
         return {"ok": True}
     except OSError as e:
         return {"error": str(e)}
+
+
+def open_path(path: str) -> dict:
+    """Open a file with the OS default app (double-click equivalent). Read-only launch:
+    hands the path to the OS opener, never reads content. Unrestricted like reveal()."""
+    try:
+        rp = Path(path).resolve()
+    except OSError:
+        return {"error": "bad path"}
+    if not rp.exists():
+        return {"error": "not found"}
+    try:
+        if sys.platform == "darwin":
+            subprocess.run(["open", str(rp)], check=False)                # macOS default app
+        elif sys.platform.startswith("win"):
+            subprocess.run(["cmd", "/c", "start", "", str(rp)], check=False)  # Windows default app
+        else:
+            subprocess.run(["xdg-open", str(rp)], check=False)           # Linux default app
+        return {"ok": True}
+    except OSError as e:
+        return {"error": str(e)}
