@@ -65,6 +65,20 @@ Click a group header to **collapse / expand** it.
 
 ---
 
+## Settings (⚙ next to Search)
+
+Opens a panel; all choices persist in your browser (localStorage) and apply on load. Esc or ✕ closes it.
+
+| Setting | Options |
+|---|---|
+| **Theme** | Auto (follows your OS) · Dark · Light |
+| **Font size** | Small · Medium · Large (scales the result text) |
+| **Font family** | System · Sans-serif · Monospace · Serif |
+| **Density** | Comfortable · Compact (row spacing) |
+| **Results per page** | 25 · 50 · 100 |
+| **Monospace snippets** | Render snippet text in monospace (nice for code/paths) |
+| **Reset to defaults** | Back to Auto / Medium / System / Comfortable / 50 |
+
 ## Everyday use
 
 - **Whole word** — biggest noise reducer

@@ -24,15 +24,65 @@ function syncRailHighlight() {
   });
 }
 
+// ---------- settings (persisted in localStorage, applied via root data-attrs) ----------
+const FONT_STACKS = {
+  system: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  sans: "Inter, 'Helvetica Neue', Arial, sans-serif",
+  mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  serif: "Georgia, 'Times New Roman', serif",
+};
+const DEFAULT_SETTINGS = { theme: "auto", fs: "md", font: "system", density: "comfortable", perpage: "50", snipmono: false };
+function loadSettings() {
+  try { return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem("retrace.settings") || "{}") }; }
+  catch (_) { return { ...DEFAULT_SETTINGS }; }
+}
+function saveSettings() { try { localStorage.setItem("retrace.settings", JSON.stringify(state.settings)); } catch (_) {} }
+function applySettings() {
+  const s = state.settings, r = document.documentElement;
+  r.dataset.theme = s.theme;
+  r.dataset.fs = s.fs;
+  r.dataset.density = s.density;
+  r.dataset.snipmono = s.snipmono ? "1" : "0";
+  r.style.setProperty("--app-font", FONT_STACKS[s.font] || FONT_STACKS.system);
+}
+function reflectSettings() {                         // push state -> form controls
+  const s = state.settings;
+  $("#set-theme").value = s.theme; $("#set-fs").value = s.fs; $("#set-font").value = s.font;
+  $("#set-density").value = s.density; $("#set-perpage").value = s.perpage; $("#set-snipmono").checked = s.snipmono;
+}
+function bindSettings() {
+  reflectSettings();
+  const update = (key, val, research = false) => {
+    state.settings[key] = val; saveSettings(); applySettings();
+    if (research) runSearch();
+  };
+  $("#set-theme").onchange = (e) => update("theme", e.target.value);
+  $("#set-fs").onchange = (e) => update("fs", e.target.value);
+  $("#set-font").onchange = (e) => update("font", e.target.value);
+  $("#set-density").onchange = (e) => update("density", e.target.value);
+  $("#set-snipmono").onchange = (e) => update("snipmono", e.target.checked);
+  $("#set-perpage").onchange = (e) => update("perpage", e.target.value, true);   // page size change → re-search
+  $("#settingsbtn").onclick = () => $("#settings").classList.toggle("hidden");
+  $("#settings-close").onclick = () => $("#settings").classList.add("hidden");
+  $("#set-reset").onclick = () => {
+    state.settings = { ...DEFAULT_SETTINGS };
+    saveSettings(); applySettings(); reflectSettings(); runSearch();
+    toast("Settings reset to defaults");
+  };
+}
+
 // ---------- boot ----------
 init();
 async function init() {
+  state.settings = loadSettings();
+  applySettings();                                   // apply before first paint to avoid flash
   const projects = await api("/api/projects");
   state.projects = projects;
   renderRail();
   await renderSources();
   bindSearch();
   bindChips();
+  bindSettings();
   bindDrawer();
   bindSources();
   const eng = (await api("/api/search?q=")).engine;
@@ -118,7 +168,7 @@ function bindSearch() {
   $("#groupby").addEventListener("change", () => scheduleSearch());
   document.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); $("#q").select(); }
-    if (e.key === "Escape") closeDrawer();
+    if (e.key === "Escape") { closeDrawer(); $("#settings").classList.add("hidden"); }
   });
 }
 function bindChips() {
@@ -139,7 +189,7 @@ async function runSearch(page = 1) {
   const params = new URLSearchParams();
   params.set("q", q);
   params.set("page", page);
-  params.set("per", "50");
+  params.set("per", (state.settings && state.settings.perpage) || "50");
   if (state.selected.size) params.set("project", [...state.selected].join(","));
   const prov = chipVals("provider"); if (prov.length) params.set("provider", prov.join(","));
   const src = chipVals("source"); if (src.length) params.set("source", src.join(","));

@@ -23,6 +23,9 @@
       <div id="qrow">
         <input id="q" type="search" placeholder="Search history &amp; memory…  (⌘K)" autocomplete="off" />
         <button id="searchbtn" title="Search now (Enter)">Search</button>
+        <button id="settingsbtn" title="Settings" aria-label="Settings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V15z"/></svg>
+        </button>
       </div>
       <div id="filters">
         <div class="chipset" data-group="provider">
@@ -66,6 +69,53 @@
   </div>
   <div id="scrim" class="hidden"></div>
 
+  <div id="settings" class="hidden" role="dialog" aria-label="Settings">
+    <div class="settings-head">
+      <span>Settings</span>
+      <button id="settings-close" aria-label="Close settings">✕</button>
+    </div>
+    <div class="settings-body">
+      <label class="set-row"><span>Theme</span>
+        <select id="set-theme">
+          <option value="auto">Auto (system)</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </label>
+      <label class="set-row"><span>Font size</span>
+        <select id="set-fs">
+          <option value="sm">Small</option>
+          <option value="md">Medium</option>
+          <option value="lg">Large</option>
+        </select>
+      </label>
+      <label class="set-row"><span>Font family</span>
+        <select id="set-font">
+          <option value="system">System</option>
+          <option value="sans">Sans-serif</option>
+          <option value="mono">Monospace</option>
+          <option value="serif">Serif</option>
+        </select>
+      </label>
+      <label class="set-row"><span>Density</span>
+        <select id="set-density">
+          <option value="comfortable">Comfortable</option>
+          <option value="compact">Compact</option>
+        </select>
+      </label>
+      <label class="set-row"><span>Results per page</span>
+        <select id="set-perpage">
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+      <label class="set-row"><span>Monospace snippets</span>
+        <input type="checkbox" id="set-snipmono" />
+      </label>
+      <button id="set-reset" class="set-reset">Reset to defaults</button>
+    </div>
+  </div>
   <script src="/static/app.js"></script>
 </body>
 </html>
