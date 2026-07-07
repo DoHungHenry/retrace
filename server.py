@@ -116,18 +116,37 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def _merged_projects() -> list:
-    """One entry per real working directory, merging all providers' projects under it."""
+    """One entry per real working directory ("space"), merging all providers' projects
+    AND any custom folder sources under it. A folder you've used an AI agent in *and*
+    added as a source becomes a single space with a `files` provider — not two rows."""
     merged: dict = {}
-    for p in parser.list_projects() + codex.list_projects() + cline.list_projects():
-        key = (p["realPath"] or "").rstrip("/") or p["realPath"]
+
+    def ensure(key: str) -> dict:
         m = merged.get(key)
         if m is None:
             m = merged[key] = {"realPath": key, "providers": {}, "sessionCount": 0,
                                "lastActivity": 0.0, "hasMemory": False}
+        return m
+
+    for p in parser.list_projects() + codex.list_projects() + cline.list_projects():
+        key = (p["realPath"] or "").rstrip("/") or p["realPath"]
+        m = ensure(key)
         m["providers"][p["provider"]] = {"dir": p["dir"], "sessionCount": p["sessionCount"]}
         m["sessionCount"] += p["sessionCount"]
         m["lastActivity"] = max(m["lastActivity"], p["lastActivity"])
         m["hasMemory"] = m["hasMemory"] or p["hasMemory"]
+
+    # Fold folder sources into the matching space (same resolved path = same space);
+    # a source with no matching AI history becomes its own files-only space.
+    for s in filesrc.list_sources():
+        try:
+            key = str(Path(s["path"]).resolve()).rstrip("/")
+        except OSError:
+            key = (s.get("path") or "").rstrip("/")
+        m = ensure(key)
+        m["providers"]["files"] = {"dir": s["path"], "sessionCount": 0,
+                                   "sourceId": s["id"], "label": s.get("label") or ""}
+
     out = list(merged.values())
     out.sort(key=lambda m: m["lastActivity"], reverse=True)
     return out

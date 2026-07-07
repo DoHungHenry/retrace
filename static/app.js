@@ -7,8 +7,8 @@ const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 
 const state = { projects: [], selected: new Set(), engine: "", page: 1 };
 
-// Toggle a "space" (project or custom source) in/out of the multi-select filter.
-// Empty selection = search all spaces. Shared by the project rail and the sources list.
+// Toggle a "space" (real working dir: AI history and/or a custom folder source) in/out
+// of the multi-select filter. Empty selection = search all spaces.
 function toggleSpace(path) {
   if (state.selected.has(path)) state.selected.delete(path);
   else state.selected.add(path);
@@ -16,7 +16,7 @@ function toggleSpace(path) {
   scheduleSearch();         // debounced: pick several spaces → one search
 }
 function syncRailHighlight() {
-  $$("#projects li, #sources li").forEach((x) => {
+  $$("#projects li").forEach((x) => {
     const on = state.selected.has(x.dataset.dir);
     x.classList.toggle("on", on);
     const cb = x.querySelector(".spacebox");
@@ -76,10 +76,7 @@ init();
 async function init() {
   state.settings = loadSettings();
   applySettings();                                   // apply before first paint to avoid flash
-  const projects = await api("/api/projects");
-  state.projects = projects;
-  renderRail();
-  await renderSources();
+  await refreshSpaces();
   bindSearch();
   bindChips();
   bindSettings();
@@ -90,24 +87,39 @@ async function init() {
   $("#q").focus();
 }
 
-// ---------- custom sources (generic folders) ----------
-async function renderSources() {
-  const list = await api("/api/sources");
-  const ul = $("#sources");
+// ---------- spaces rail (unified: AI history + folder sources) ----------
+// One row per real working dir. A space may carry AI history (claude/codex/cline dots),
+// a custom folder source (files dot + remove button), or both — merged server-side.
+async function refreshSpaces() {
+  state.projects = await api("/api/projects");
+  renderRail();
+}
+
+function renderRail() {
+  const ul = $("#projects");
   ul.innerHTML = "";
-  for (const s of list) {
+  for (const p of state.projects) {
     const li = document.createElement("li");
-    li.dataset.dir = s.path;
-    li.dataset.path = s.path;
+    li.dataset.dir = p.realPath;                 // canonical filter key = real working dir
+    li.dataset.path = p.realPath;
+    const provs = p.providers || {};
+    const dots = Object.keys(provs).map((pr) => `<span class="dot ${pr}"></span>`).join("");
+    const files = provs.files;                   // custom folder source folded into this space
+    const name = (files && files.label) ? files.label : shortName(p.realPath);
+    const rm = files ? `<button class="rm" title="Remove folder source">✕</button> ` : "";
     li.innerHTML =
-      `<span class="nm"><input type="checkbox" class="spacebox" tabindex="-1"><span class="dot files"></span>${esc(s.label)}</span>` +
-      `<span class="ct"><button class="rm" title="Remove">✕</button></span>`;
-    li.querySelector(".nm").onclick = () => toggleSpace(s.path);
-    li.querySelector(".rm").onclick = async (e) => {
+      `<span class="nm"><input type="checkbox" class="spacebox" tabindex="-1">${dots}${esc(name)}</span>` +
+      `<span class="ct">${p.hasMemory ? '<button class="membtn" title="Open all memory files for this project">◆</button> ' : ""}${rm}${p.sessionCount || ""}</span>`;
+    li.onclick = () => toggleSpace(p.realPath);
+    const mb = li.querySelector(".membtn");        // open all memory files, don't toggle the space
+    const memDir = provs.claude && provs.claude.dir;  // memory lives under the claude encoded dir
+    if (mb && memDir) mb.onclick = (e) => { e.stopPropagation(); openMemory(memDir, ""); };
+    const rmb = li.querySelector(".rm");           // remove the folder source (keeps AI history, if any)
+    if (rmb && files) rmb.onclick = async (e) => {
       e.stopPropagation();
-      state.selected.delete(s.path);           // drop from filter if it was selected
-      await api(`/api/sources/remove?id=${encodeURIComponent(s.id)}`);
-      await renderSources();
+      state.selected.delete(p.realPath);
+      await api(`/api/sources/remove?id=${encodeURIComponent(files.sourceId)}`);
+      await refreshSpaces();
       runSearch();
     };
     ul.appendChild(li);
@@ -122,29 +134,8 @@ function bindSources() {
     const label = prompt("Label (optional):", "") || "";
     const res = await api(`/api/sources/add?path=${encodeURIComponent(path)}&label=${encodeURIComponent(label)}`);
     if (res && res.error) { alert("Could not add: " + res.error); return; }
-    await renderSources();
+    await refreshSpaces();
   };
-}
-
-// ---------- project rail (filter) ----------
-function renderRail() {
-  const ul = $("#projects");
-  ul.innerHTML = "";
-  for (const p of state.projects) {
-    const li = document.createElement("li");
-    li.dataset.dir = p.realPath;                 // canonical filter key = real working dir
-    li.dataset.path = p.realPath;
-    const dots = Object.keys(p.providers || {}).map((pr) => `<span class="dot ${pr}"></span>`).join("");
-    li.innerHTML =
-      `<span class="nm"><input type="checkbox" class="spacebox" tabindex="-1">${dots}${esc(shortName(p.realPath))}</span>` +
-      `<span class="ct">${p.hasMemory ? '<button class="membtn" title="Open all memory files for this project">◆</button> ' : ""}${p.sessionCount}</span>`;
-    li.onclick = () => toggleSpace(p.realPath);
-    const mb = li.querySelector(".membtn");        // open all memory files, don't toggle the space
-    const memDir = p.providers && p.providers.claude && p.providers.claude.dir;  // memory lives under the claude encoded dir
-    if (mb && memDir) mb.onclick = (e) => { e.stopPropagation(); openMemory(memDir, ""); };
-    ul.appendChild(li);
-  }
-  syncRailHighlight();                          // keep selection visible after re-render
 }
 function shortName(path) {
   const parts = (path || "").split("/").filter(Boolean);

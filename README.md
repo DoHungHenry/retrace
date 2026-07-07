@@ -98,6 +98,7 @@ Missing tools are simply skipped — run it with whatever you have installed.
 - **Grouped by session/file**, ranked by relevance.
 - Click a result → full **transcript** (AI) or **file preview** (folders), with matches highlighted.
 - **Per-result actions** on every hit — **Open** (default app), **Copy path** (absolute path to paste / hand to another agent), **Copy id** (session id, on history results), and **Reveal ↗** (Finder / Explorer). Works for AI transcripts (`.jsonl`), memory (`.md`), and folder-source files; retrace never edits them.
+- **Unified by *space*** — the sidebar lists one row per real working directory. A folder you've used an AI agent in *and* added as a folder source shows as a single space (with a `files` dot), so history and raw files search together — no duplicate rows.
 - **Add/remove folder sources** from the UI. Content is searched for text files; **all files are findable by name** (so `.docx`/`.xlsx`/`.pdf` show up by filename).
 - **Sort & group** results (by relevance/date/space/provider; group headers collapse).
 
@@ -106,8 +107,10 @@ Missing tools are simply skipped — run it with whatever you have installed.
 
 ## Custom folder sources
 
-Click **+** next to *Sources* in the sidebar and enter a folder path. Sources persist in
-`sources.json` (git-ignored). Scans respect `.gitignore` and skip binaries.
+Click **+** next to *Spaces* in the sidebar and enter a folder path. Sources persist in
+`sources.json` (git-ignored). Scans respect `.gitignore` and skip binaries. If the folder
+matches a project you already have AI history for, it merges into that space (a `files`
+dot appears on the existing row) instead of adding a second entry.
 
 **Note:** raw content search only works for text files (`.md`, `.txt`, `.csv`, `.json`, code, …).
 Binary formats (`.docx`, `.xlsx`, `.pptx`, `.pdf`) are matched **by filename** only.
