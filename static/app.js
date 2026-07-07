@@ -202,6 +202,7 @@ function renderResults(data, q, wholeWord) {
         ${r.path ? `<span class="rowbtns">
           <button class="rowbtn open" data-path="${esc(r.path)}" title="Open with default app">Open</button>
           <button class="rowbtn copy" data-path="${esc(r.path)}" title="Copy file path">Copy path</button>
+          ${r.source === "history" && r.sessionId ? `<button class="rowbtn copyid" data-id="${esc(r.sessionId)}" title="Copy session id">Copy id</button>` : ""}
           <button class="rowbtn reveal" data-path="${esc(r.path)}" title="Reveal in Finder / Explorer">Reveal ↗</button>
         </span>` : ""}
       </div>
@@ -233,6 +234,11 @@ function renderResults(data, q, wholeWord) {
     e.stopPropagation();
     const ok = await copyText(b.dataset.path); // clipboard API + fallback for embedded webviews
     toast(ok ? "File path copied to clipboard" : "Copy failed", ok);
+  });
+  $$(".rowbtn.copyid", res).forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    const ok = await copyText(b.dataset.id);
+    toast(ok ? "Session id copied to clipboard" : "Copy failed", ok);
   });
 }
 
