@@ -39,6 +39,33 @@ Or use the launcher (start / stop / restart):
 > **Tip (VS Code):** open the URL in the built-in Simple Browser
 > (`⌘⇧P` → *Simple Browser: Show*) to keep it embedded in your editor.
 
+### Add it as a Claude Code skill
+
+A ready-made [Agent Skill](https://docs.claude.com/en/docs/claude-code/skills) ships in
+[`skill/`](skill/SKILL.md), so you can launch retrace by just asking Claude Code
+*"open my AI history"* instead of remembering the command.
+
+**Install (once), from the repo root:**
+
+```bash
+# 1. Copy the skill into your personal Claude Code skills folder
+cp -r skill ~/.claude/skills/retrace-history-files
+
+# 2. Tell it where you cloned retrace (self-locates via RETRACE_DIR)
+echo "export RETRACE_DIR=\"$PWD\"" >> ~/.zshrc   # or ~/.bashrc
+source ~/.zshrc
+```
+
+That's it — Claude Code auto-discovers any skill under `~/.claude/skills/`. Start a new
+session and type `/retrace-history-files`, or just ask it to open/search your AI history
+and it'll pick the skill up by its description.
+
+- **Project-scoped instead of global?** Copy into `.claude/skills/` inside a specific
+  project rather than `~/.claude/skills/`.
+- **Other agents (Codex, Cline, …):** point their command/task runner at
+  `bash "$RETRACE_DIR/start.sh"` — the skill file is Claude-Code-specific, but the
+  launch command is universal.
+
 ### Try it with sample data (no real history needed)
 
 ```bash
