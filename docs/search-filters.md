@@ -27,6 +27,8 @@ Both **on** by default.
 | **History** | Conversation transcripts |
 | **Memory** | The `memory/*.md` files (persistent facts) |
 
+> **Browse a project's memory** — click the **◆** button on a project in the sidebar to open *all* its memory files at once (no keyword needed). Only projects that have memory show the ◆.
+
 ## Matching behavior
 
 | Chip | Effect |

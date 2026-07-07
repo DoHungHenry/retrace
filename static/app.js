@@ -87,8 +87,11 @@ function renderRail() {
     const dots = Object.keys(p.providers || {}).map((pr) => `<span class="dot ${pr}"></span>`).join("");
     li.innerHTML =
       `<span class="nm"><input type="checkbox" class="spacebox" tabindex="-1">${dots}${esc(shortName(p.realPath))}</span>` +
-      `<span class="ct">${p.hasMemory ? '<span class="mem">◆</span> ' : ""}${p.sessionCount}</span>`;
+      `<span class="ct">${p.hasMemory ? '<button class="membtn" title="Open all memory files for this project">◆</button> ' : ""}${p.sessionCount}</span>`;
     li.onclick = () => toggleSpace(p.realPath);
+    const mb = li.querySelector(".membtn");        // open all memory files, don't toggle the space
+    const memDir = p.providers && p.providers.claude && p.providers.claude.dir;  // memory lives under the claude encoded dir
+    if (mb && memDir) mb.onclick = (e) => { e.stopPropagation(); openMemory(memDir, ""); };
     ul.appendChild(li);
   }
   syncRailHighlight();                          // keep selection visible after re-render
