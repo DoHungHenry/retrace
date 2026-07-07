@@ -43,12 +43,16 @@ body {
 /* ---- main ---- */
 #main { display: flex; flex-direction: column; overflow: hidden; }
 #searchbar { padding: 16px 20px 10px; border-bottom: 1px solid var(--line); }
+#qrow { display: flex; gap: 8px; align-items: stretch; }
 #q {
-  width: 100%; padding: 12px 14px; font-size: 15px; color: var(--txt);
+  flex: 1; padding: 12px 14px; font-size: 15px; color: var(--txt);
   background: var(--panel2); border: 1px solid var(--line); border-radius: var(--radius);
   outline: none;
 }
 #q:focus { border-color: var(--accent); }
+#searchbtn { flex-shrink: 0; padding: 0 18px; font-size: 14px; color: #fff; background: var(--accent); border: none; border-radius: var(--radius); cursor: pointer; }
+#searchbtn:hover { filter: brightness(1.1); }
+#searchbtn:active { filter: brightness(.95); }
 #filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
 .chipset { display: flex; gap: 4px; }
 .chip {

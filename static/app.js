@@ -110,7 +110,10 @@ function scheduleSearch(delay = 400) {
   _searchTimer = setTimeout(() => runSearch(), delay);
 }
 function bindSearch() {
+  const runNow = () => { clearTimeout(_searchTimer); runSearch(); };   // cancel pending debounce, search immediately
   $("#q").addEventListener("input", () => scheduleSearch());
+  $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); runNow(); } });
+  $("#searchbtn").addEventListener("click", runNow);
   $("#sortby").addEventListener("change", () => scheduleSearch());
   $("#groupby").addEventListener("change", () => scheduleSearch());
   document.addEventListener("keydown", (e) => {

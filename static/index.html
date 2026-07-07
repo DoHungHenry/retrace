@@ -20,7 +20,10 @@
 
   <main id="main">
     <header id="searchbar">
-      <input id="q" type="search" placeholder="Search history &amp; memory…  (⌘K)" autocomplete="off" />
+      <div id="qrow">
+        <input id="q" type="search" placeholder="Search history &amp; memory…  (⌘K)" autocomplete="off" />
+        <button id="searchbtn" title="Search now (Enter)">Search</button>
+      </div>
       <div id="filters">
         <div class="chipset" data-group="provider">
           <button class="chip on" data-val="claude">Claude</button>
