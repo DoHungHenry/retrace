@@ -11,3 +11,12 @@ __pycache__/
 # os / editor
 .DS_Store
 *.log
+
+.repomixignore
+AGENTS.md
+CLAUDE.md
+
+release-manifest.json
+.claude/
+.opencode/
+plans/
