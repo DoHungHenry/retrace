@@ -161,9 +161,9 @@ body {
 .filebody mark { background: var(--mark); color: #000; }
 .result .kw { background: #2a2f38; color: var(--mark); border-radius: 20px; padding: 0 7px; font-size: 10px; }
 #toasts { position: fixed; top: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.toast { background: var(--panel2, #1b1b1f); color: var(--txt, #eee); border: 1px solid var(--accent, #6ea8fe); border-left-width: 3px; border-radius: 8px; padding: 9px 14px; font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.4); opacity: 0; transform: translateX(12px); transition: opacity .2s, transform .2s; max-width: 340px; }
+.toast { background: #1a7f4b; color: #fff; border: 1px solid #2bb36c; border-left: 3px solid #2bb36c; border-radius: 8px; padding: 9px 14px; font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.4); opacity: 0; transform: translateX(12px); transition: opacity .2s, transform .2s; max-width: 340px; }
 .toast.show { opacity: 1; transform: translateX(0); }
-.toast.err { border-color: #e5686a; }
+.toast.err { background: #a5352f; border-color: #e5686a; border-left-color: #e5686a; }
 .result .rowbtns { margin-left: auto; display: inline-flex; gap: 6px; flex-shrink: 0; }
 .result .rowbtn { background: transparent; border: 1px solid var(--line); color: var(--dim); border-radius: 6px; padding: 1px 8px; font-size: 11px; cursor: pointer; white-space: nowrap; }
 .result .rowbtn:hover { color: #fff; border-color: var(--accent); }
