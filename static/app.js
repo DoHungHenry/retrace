@@ -192,6 +192,7 @@ function renderResults(data, q, wholeWord) {
     const snips = (r.snippets || []).map((s) =>
       `<div class="snip">${highlight(s.text, kws, wholeWord)}</div>`).join("");
     html += `<div class="result" data-json='${esc(JSON.stringify(r))}'>
+      ${r.path ? `<div class="rpath" title="${esc(r.path)}">${esc(r.path)}</div>` : ""}
       <div class="meta">
         <span class="tag ${r.provider}">${r.provider}</span>
         <span class="rtitle">${title}</span>
