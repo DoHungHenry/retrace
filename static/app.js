@@ -237,7 +237,7 @@ function renderResults(data, q, wholeWord) {
       <div class="meta">
         <span class="tag ${r.provider}">${r.provider}</span>
         <span class="rtitle">${title}</span>
-        <span>· ${proj}</span>${when ? `<span>· ${when}</span>` : ""}
+        <span>· ${proj}</span>${when ? `<span class="when" title="Last updated">· Updated ${when}</span>` : ""}
         <span class="mcount">${r.count} match${r.count === 1 ? "" : "es"}</span>
         <span class="src">${r.source}</span>
         ${kwChips}

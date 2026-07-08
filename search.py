@@ -245,7 +245,7 @@ def _claude_result(match: dict, query: str, whole_word: bool) -> dict | None:
         if pos < 0:
             return None
         return {"provider": "claude", "project": real, "locator": encoded_dir,
-                "source": "memory", "role": "memory", "ts": "", "sessionId": "",
+                "source": "memory", "role": "memory", "ts": _file_iso(path), "sessionId": "",
                 "file": path.name, "snippet": _snippet_at(text, pos, len(query))}
     try:
         rec = json.loads(match["line"])
